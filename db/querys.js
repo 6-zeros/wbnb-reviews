@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const domain = process.env.DOMAIN || '172.17.0.4';
+const domain = process.env.DOMAIN || '172.17.0.2';
 
 const db = mongoose.connect(
   `mongodb://${domain}:27017/errbnb`,
