@@ -1,7 +1,6 @@
 /* eslint-disable prefer-destructuring */
 const faker = require('faker');
 const mongoose = require('mongoose');
-
 const domain = process.env.DOMAIN || '172.17.0.2';
 
 const db = mongoose.connect(
