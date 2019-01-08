@@ -1,4 +1,4 @@
-FROM mhart/alpine-node:8
+FROM node:lts-slim
 
 RUN mkdir -p /src/app
 
