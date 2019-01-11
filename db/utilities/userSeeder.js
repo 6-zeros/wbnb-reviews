@@ -1,8 +1,7 @@
 const faker = require('faker');
 const fs = require('fs');
 
-const quantity = 500000; // total = 2 x quantity
-// will generate two files
+const quantity = 1000; //5million
 
 const avatars = [
   'https://a0.muscache.com/im/users/3272332/profile_pic/1366680802/original.jpg?aki_policy=profile_x_medium',
@@ -27,25 +26,17 @@ const generateRandomNumber = (min, max) => {
 };
 
 const generateUser = (index, callback) => {
-  let user = {
-    user_id: index,
-    name: faker.name.findName(),
-    userAvatar: avatars[generateRandomNumber(0, 10)]
-  }
-  console.log(index);
+  let user = (index === 1) 
+    ? `user_id,name,userAvatar\n${index},${faker.name.findName()},${avatars[generateRandomNumber(0, 10)]}`
+    : `\n${index},${faker.name.findName()},${avatars[generateRandomNumber(0, 10)]}`;
   callback(user);
 }
 
-const storage = {
-  count: 1,
+const countKeeper = {
+  count: 0,
   fileCount: 0,
-  updateFileCount: function() {
-    this.fileCount;
-  },
-  updateCounter: function() {
-    this.count++;
-  },
   getCount: function() {
+    this.count++;
     return this.count;
   },
   getFileName: function() {
@@ -54,35 +45,26 @@ const storage = {
   }
 }
 
-const updateFileCount = storage.updateFileCount.bind(storage);
-const getFileName = storage.getFileName.bind(storage);
-const updateCounter = storage.updateCounter.bind(storage);
-const getCount = storage.getCount.bind(storage);
+const getFileName = countKeeper.getFileName.bind(countKeeper);
+const getCount = countKeeper.getCount.bind(countKeeper);
 
-const writeData = function(qty, callback) {
-  const stream = fs.createWriteStream(`./CSVDATA/Users${getFileName()}.txt`, {'flags': 'a'});
+const writeUserData = function(qty, callback) {
+  const stream = fs.createWriteStream(`./CSVDATA/Users${getFileName()}.csv`, {'flags': 'a'});
   function write(qty) {
     var ok = true;
     do {
       qty -= 1;
       if (qty === 1) {
         generateUser(getCount(), (user) => {
-          updateCounter();
-          stream.write(JSON.stringify(user), 'utf8', callback);
+          stream.write(user, 'utf8', callback(stream));
         });
       } else {
-        // see if we should continue, or wait
-        // don't pass the callback, because we're not done yet.
         generateUser(getCount(), (user) => {
-          updateCounter();
-          ok = stream.write(JSON.stringify(user), 'utf8');
+          ok = stream.write(user, 'utf8');
         });
       }
     } while (qty > 0 && ok);
     if (qty > 1) {
-      // had to stop early!
-      // write some more once it drains
-      // console.log('drain');
       stream.once('drain', () => {
         write(qty);
       });
@@ -91,25 +73,11 @@ const writeData = function(qty, callback) {
   write(qty);
 }
 
-// const delay = function(ms) {
-//   var cur_d = new Date();
-//   var cur_ticks = cur_d.getTime();
-//   var ms_passed = 0;
-//   while(ms_passed < ms) {
-//       var d = new Date();  // Possible memory leak?
-//       var ticks = d.getTime();
-//       ms_passed = ticks - cur_ticks;
-//       // d = null;  // Prevent memory leak?
-//   }
-// }
-
 const generateUserDocuments = function(qty) {
   console.time();
-  writeData(qty, () => {
-    writeData(qty, () => {
-      console.timeEnd();
-    })
+  writeUserData(qty, () => {
+    console.timeEnd();
   });
 }
 
-generateUserDocuments(quantity);
+module.exports = {generateUserDocuments};

@@ -1,62 +1,59 @@
 const faker = require('faker');
 const fs = require('fs');
 
-const quantity = 10000000; //10 mil
+const quantity = 1000; //10 million
 
-const generateRandomNumber = (min, max) => {
-  let randomNumber = Math.round(Math.random() * max);
-  if (randomNumber < min) {
-    randomNumber = Math.round(Math.random() * max);
-  }
-  return randomNumber;
-};
-
-const generateRoom = index => {
-  var room = {
-    room_id: index,
-    name: `room${index}`,
-  }
-  return room;
+const generateRoom = (index, callback) => {
+  let room = (index === 1) ? `room_id, name\n${index},room${index}` : `\n${index},room${index}`;
+  callback(room);
 }
 
+const countKeeper = {
+  count: 0,
+  fileCount: 0,
+  getCount: function() {
+    this.count++;
+    return this.count;
+  },
+  getFileName: function() {
+    this.fileCount++;
+    return this.fileCount;
+  }
+}
+
+const getFileName = countKeeper.getFileName.bind(countKeeper);
+const getCount = countKeeper.getCount.bind(countKeeper);
+
 const writeData = function(qty, callback) {
-  let count = 1;
-  qty += 1;
-  const stream = fs.createWriteStream(`./CSVDATA/Rooms.txt`, {'flags': 'a'});
-  function write(qty, count) {
+  const stream = fs.createWriteStream(`./CSVDATA/Rooms${getFileName()}.csv`, {'flags': 'a'});
+  function write(qty) {
     var ok = true;
     do {
       qty -= 1;
       if (qty === 1) {
-        var data = JSON.stringify(generateRoom(count));
-        count++;
-        stream.write(data, 'utf8', callback);
+        generateRoom(getCount(), room => {
+          stream.write(room, 'utf8', callback(stream));
+        });
       } else {
-        // see if we should continue, or wait
-        // don't pass the callback, because we're not done yet.
-        var data = JSON.stringify(generateRoom(count));
-        count++;
-        ok = stream.write(data, 'utf8');
+        generateRoom(getCount(), room => {
+          ok = stream.write(room, 'utf8');
+        });
       }
-    } while (qty > 1 && ok);
+    } while (qty > 0 && ok);
     if (qty > 1) {
-      // had to stop early!
-      // write some more once it drains
-      // console.log('drain');
       stream.once('drain', () => {
-        count++;
-        write(qty-1, count);
+        write(qty);
       });
     }
   }
-  write(qty, count);
+  write(qty);
 }
 
-const generateRoomDocument = function(qty) {
+const generateRoomDocuments = function(qty) {
   console.time();
   writeData(qty, () => {
     console.timeEnd();
   });
 }
 
-generateRoomDocument(quantity);
+module.exports = {generateRoomDocuments};

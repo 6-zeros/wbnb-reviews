@@ -1,9 +1,6 @@
 const faker = require('faker');
 const fs = require('fs');
 
-const quantity = 10000000 //30 mil
-// const quantity = 1000;
-
 const generateRandomNumber = (min, max) => {
   let randomNumber = Math.round(Math.random() * max);
   if (randomNumber < min) {
@@ -29,62 +26,64 @@ const months = [
 
 const years = ['2018', '2017', '2016', '2015', '2014', '2013', '2012', '2011', '2010'];
 
-const generateReview = index => {
-  var review = {
-    user_id: generateRandomNumber(1, 2000000),
-    room_id: generateRandomNumber(1, 10000000),
-    relevance: generateRandomNumber(1, 10),
-    dateStayed: `${months[generateRandomNumber(0, 11)]} ${years[generateRandomNumber(0, 8)]}`,
-    accuracy: generateRandomNumber(1, 5),
-    communication: generateRandomNumber(1, 5),
-    cleanliness: generateRandomNumber(1, 5),
-    location: generateRandomNumber(1, 5),
-    checkin: generateRandomNumber(1, 5),
-    value: generateRandomNumber(1, 5),
-    body: faker.lorem.paragraphs(4),
-  }
-  console.log(index);
-  return review;
+const generateReview = (callback)=> {
+  const keys = 'user_id, room_id, relevance, dateStayed, accuracy, communication, cleanliness, location, checkin, value, body';
+  let entry = `\n${generateRandomNumber(1, 5000000)},${generateRandomNumber(1, 10000000)},${generateRandomNumber(1, 10)},${months[generateRandomNumber(0, 11)]} ${years[generateRandomNumber(0, 8)]},${generateRandomNumber(1, 5)},${generateRandomNumber(1, 5)},${generateRandomNumber(1, 5)},${generateRandomNumber(1, 5)},${generateRandomNumber(1, 5)},${generateRandomNumber(1, 5)},${JSON.stringify(faker.lorem.paragraphs(4))}`;
+  let review = countKeeper.newFile ? keys + entry : entry;
+  countKeeper.newFile = false;
+  callback(review);
 }
-  
+
+const countKeeper = {
+  count: 0,
+  fileCount: 0,
+  newFile: false,
+  getCount: function() {
+    this.count++;
+    return this.count;
+  },
+  getFileName: function() {
+    this.fileCount++;
+    this.newFile = true;
+    return this.fileCount;
+  }
+}
+const getFileName = countKeeper.getFileName.bind(countKeeper);
+
 const writeData = function(qty, callback) {
-  let count = 1;
-  qty += 1;
-  const stream = fs.createWriteStream(`./CSVDATA/Reviews.txt`, {'flags': 'a'});
-  function write(qty, count) {
+  const stream = fs.createWriteStream(`./CSVDATA/Reviews${getFileName()}.csv`, {'flags': 'a'});
+  function write(qty) {
     var ok = true;
     do {
       qty -= 1;
       if (qty === 1) {
-        var data = JSON.stringify(generateReview(count));
-        count++;
-        stream.write(data, 'utf8', callback);
+        generateReview(review => {
+          stream.write(review, 'utf8', callback);
+        });
       } else {
-        // see if we should continue, or wait
-        // don't pass the callback, because we're not done yet.
-        var data = JSON.stringify(generateReview(count));
-        count++;
-        ok = stream.write(data, 'utf8');
+        generateReview(review => {
+          ok = stream.write(review, 'utf8');
+        });
       }
-    } while (qty > 1 && ok);
+    } while (qty > 0 && ok);
     if (qty > 1) {
-      // had to stop early!
-      // write some more once it drains
-      // console.log('drain');
       stream.once('drain', () => {
-        count++;
-        write(qty-1, count);
+        write(qty);
       });
     }
   }
-  write(qty, count);
+  write(qty);
 }
 
-const generateReviewDocument = function(qty) {
+const generateReviewDocuments = function(qty) {
   console.time();
   writeData(qty, () => {
-    console.timeEnd();
+    writeData(qty, () => {
+      writeData(qty, () => {
+        console.timeEnd();
+      });
+    });
   });
 }
 
-generateReviewDocument(quantity);
+module.exports = {generateReviewDocuments};
