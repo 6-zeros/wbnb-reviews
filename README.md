@@ -1,6 +1,17 @@
 # Project Name
 
-> Project description
+> wbnb-reviews
+
+## CRUD API Routing
+### CREATE
+- app.post('/api/reviews/rooms/:roomid/')
+### READ
+- app.get('/api/reviews/rooms/:roomid/')
+### UPDATE
+- app.put(/api/reviews/rooms/:roomid/)
+### DELETE
+- app.delete('/api/reviews/rooms/:roomid/')
+
 
 ## Related Projects
 
