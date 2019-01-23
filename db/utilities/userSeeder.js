@@ -1,7 +1,7 @@
 const faker = require('faker');
 const fs = require('fs');
 
-const quantity = 1000; //5million
+const quantity = 5000000; //5000000
 
 const avatars = [
   'https://a0.muscache.com/im/users/3272332/profile_pic/1366680802/original.jpg?aki_policy=profile_x_medium',
@@ -80,4 +80,5 @@ const generateUserDocuments = function(qty) {
   });
 }
 
+generateUserDocuments(quantity);
 module.exports = {generateUserDocuments};

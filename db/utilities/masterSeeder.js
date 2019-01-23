@@ -4,6 +4,6 @@ const Review = require('./reviewSeeder');
 
 Room.generateRoomDocuments(10000000, () => {
   User.generateUserDocuments(5000000, () => {
-    Review.generateReviewDocuments(30000000);
+    Review.generateReviewDocuments(20000000);
   })
 });

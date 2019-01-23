@@ -8,4 +8,9 @@ bundle.js
 mockups
 jest.config.js
 fec-indiv-key-pair.pem
-db/utilities/CSVDATA/
+db/utilities/csvFiles/
+newrelic.js
+newrelic_agent.log
+server/new_relic_agent.log
+db/RedisMiddleware.js
+README.md

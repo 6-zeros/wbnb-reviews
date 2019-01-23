@@ -1,5 +1,5 @@
 {
-  "name": "",
+  "name": "wbnb",
   "version": "",
   "description": "",
   "author": "",
@@ -8,11 +8,11 @@
     "node": ">=6.13.0"
   },
   "scripts": {
-    "seed": "node ./db/utilities/dataSeed.js",
+    "seed": "node userSeeder.js | node roomSeeder.js | node reviewSeeder.js",
     "builddev": "webpack --watch",
     "startdev": "nodemon ./server/index.js",
     "build": "webpack",
-    "start": "npm run seed && node ./server/index.js",
+    "start": "nodemon ./server/index.js",
     "test": "jest --watch"
   },
   "dependencies": {
@@ -26,6 +26,7 @@
     "react": "^16.6.3",
     "react-css-modules": "^4.7.8",
     "react-dom": "^16.6.3",
+    "redis": "^2.8.0",
     "underscore": "^1.9.1",
     "webpack-cli": "^3.1.2"
   },
@@ -51,7 +52,12 @@
     "eslint-plugin-prettier": "^3.0.0",
     "eslint-plugin-react": "^7.11.1",
     "jest": "^23.6.0",
+    "k6": "0.0.0",
+    "morgan": "^1.9.1",
+    "newrelic": "^5.1.0",
     "nodemon": "^1.18.9",
+    "nr": "^0.1.0",
+    "pg": "^7.8.0",
     "prettier": "^1.15.3",
     "regenerator-runtime": "^0.13.1",
     "style-loader": "^0.23.1",
