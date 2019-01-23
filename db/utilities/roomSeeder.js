@@ -1,10 +1,10 @@
 const faker = require('faker');
 const fs = require('fs');
 
-const quantity = 1000; //10 million
+const quantity = 10000000; //10000000
 
 const generateRoom = (index, callback) => {
-  let room = (index === 1) ? `room_id, name\n${index},room${index}` : `\n${index},room${index}`;
+  let room = (index === 1) ? `room_id,name\n${index},${faker.name.firstName()}${index}` : `\n${index},${faker.name.firstName()}${index}`;
   callback(room);
 }
 
@@ -56,4 +56,5 @@ const generateRoomDocuments = function(qty) {
   });
 }
 
+generateRoomDocuments(quantity);
 module.exports = {generateRoomDocuments};

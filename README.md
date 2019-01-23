@@ -8,7 +8,7 @@
 ### READ
 - app.get('/api/reviews/rooms/:roomid/')
 ### UPDATE
-- app.put(/api/reviews/rooms/:roomid/)
+- app.put('/api/reviews/rooms/:roomid/')
 ### DELETE
 - app.delete('/api/reviews/rooms/:roomid/')
 

@@ -1,43 +1,4 @@
-const mongoose = require('mongoose');
-const domain = process.env.DOMAIN || '172.17.0.2';
-
-const db = mongoose.connect(
-  `mongodb://${domain}:27017/errbnb`,
-  { useNewUrlParser: true }
-);
-
-const reviewSchema = new mongoose.Schema({
-  roomId: Number,
-  relevance: Number,
-  name: String,
-  userAvatar: String,
-  dateStayed: String,
-  review: [
-    {
-      accuracy: Number,
-      communication: Number,
-      cleanliness: Number,
-      location: Number,
-      checkin: Number,
-      value: Number,
-      body: String
-    }
-  ]
-});
-
-const Review = mongoose.model('Review', reviewSchema);
-
-module.exports = {
-  getAllReviews: id =>
-    new Promise((resolve, reject) => {
-      Review.find({ roomId: id }, (err, allReviews) => {
-        if (err) {
-          reject(err);
-        }
-        resolve(allReviews);
-      });
-    }),
-
+const helpers = {
   sortByRelevant: allReviews =>
     new Promise(resolve => {
       const byRelevance = (a, b) => b.relevance - a.relevance;
@@ -84,12 +45,12 @@ module.exports = {
 
     // eslint-disable-next-line guard-for-in
     allReviews.forEach(review => {
-      ratings.accuracy = (ratings.accuracy + review.review[0].accuracy) / 2;
-      ratings.communication = (ratings.communication + review.review[0].communication) / 2;
-      ratings.cleanliness = (ratings.cleanliness + review.review[0].cleanliness) / 2;
-      ratings.location = (ratings.location + review.review[0].location) / 2;
-      ratings.checkin = (ratings.checkin + review.review[0].checkin) / 2;
-      ratings.value = (ratings.value + review.review[0].value) / 2;
+      ratings.accuracy = (ratings.accuracy + review.accuracy) / 2;
+      ratings.communication = (ratings.communication + review.communication) / 2;
+      ratings.cleanliness = (ratings.cleanliness + review.cleanliness) / 2;
+      ratings.location = (ratings.location + review.location) / 2;
+      ratings.checkin = (ratings.checkin + review.checkin) / 2;
+      ratings.value = (ratings.value + review.value) / 2;
     });
 
     ratings.overall =
@@ -113,5 +74,17 @@ module.exports = {
 
     roundToHalfValue();
     return ratings;
-  }
+  },
+  sortReviews: (allReviews, req) => 
+    new Promise(resolve => {
+      const { page, search, sortby } = req.query;
+      sortby === 'relevant'
+        ? helpers.sortByRelevant(allReviews)
+        : helpers.sortByRecent(allReviews)
+      .then(sortedReviews => helpers.getBySearchTerm(sortedReviews, search))
+      .then(sortedReviews => helpers.getPage(page, sortedReviews))
+      .then(pageOfReviews => resolve(pageOfReviews))
+    })
 };
+
+module.exports = helpers;
