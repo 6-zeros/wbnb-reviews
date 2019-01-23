@@ -34,7 +34,7 @@ class ReviewItem extends React.Component {
       <div className="reviewContainer" id={id}>
         <div id="flag">&#9872;</div>
         <div className="userInfo">
-          <img src={review.userAvatar} alt="user avatar" className="avatar" />
+          <img src={review.useravatar} alt="user avatar" className="avatar" />
           <div className="userText">
             <span id="username">{review.name}</span>
             <span id="dateStayed">{review.dateStayed}</span>
@@ -42,8 +42,8 @@ class ReviewItem extends React.Component {
         </div>
         <div>
             {extended === false
-            ? <p>{review.review[0].body.substring(0, 250)}... <a href="#" onClick={this.expand}>Read more</a></p>
-            : <p>{review.review[0].body}</p>}
+            ? <p>{review.body.substring(0, 250)}... <a href="#" onClick={this.expand}>Read more</a></p>
+            : <p>{review.body}</p>}
         </div>
       </div>
     );

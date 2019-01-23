@@ -9,8 +9,11 @@ mockups
 jest.config.js
 fec-indiv-key-pair.pem
 db/utilities/csvFiles/
+db/utilities/
 newrelic.js
 newrelic_agent.log
 server/new_relic_agent.log
 db/RedisMiddleware.js
 README.md
+Dockerfile
+spec/

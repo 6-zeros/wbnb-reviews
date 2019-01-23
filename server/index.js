@@ -2,6 +2,7 @@ const nr = require('newrelic');
 const express = require('express');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
+const { redis_get, redis_set } = require('../db/redis.js');
 const { sortReviews, calculateAverageRating } = require('../db/helpers.js');
 const { getReviewByRoomId, postReview, updateReviewById, deleteReviewById } = require('../db/controllers.js');
 const app = express();
@@ -14,26 +15,53 @@ app.use('/rooms/:roomid', express.static('./public/dist'));
 
 app.get('/api/reviews/rooms/:roomid/', (req, res) => {
   const { roomid } = req.params;
-  getReviewByRoomId(roomid, (err, response) => {
-    if (err) {
-      res.status(500).send();
+  redis_get(roomid)
+  .then(result => {
+    if (result === null) {
+      getReviewByRoomId(roomid, (err, response) => {
+        if (err) {
+          res.status(500).send();
+        } else {
+          let { rows } = response;
+          sortReviews(rows, req)
+          .then(reviews => {
+            // redis_set(roomid, JSON.stringify(reviews), 'EX', 20);
+            redis_set(roomid, JSON.stringify(reviews));
+            res.send(reviews);
+          })
+        }
+      })
     } else {
-      let { rows } = response;
-      sortReviews(rows, req)
-      .then(reviews => res.send(reviews));
+      res.status(300).send(JSON.parse(result));
     }
+  })
+  .catch((error) => {
+    res.status(500).send();
   })
 });
 
 app.get('/api/ratings/rooms/:roomid', (req, res) => {
   const { roomid } = req.params;
-  getReviewByRoomId(roomid, (err, response) => {
-    if (err) {
-      res.status(500).send();
+  redis_get(`ratings${roomid}`)
+  .then(result => {
+    if (result === null) {
+      getReviewByRoomId(roomid, (err, response) => {
+        if (err) {
+          res.status(500).send();
+        } else {
+          let { rows } = response;
+          let avgRatings = calculateAverageRating(rows);
+          redis_set(`ratings${roomid}`, JSON.stringify(avgRatings), 'EX', 20);
+          res.send(avgRatings);
+        }
+      })
     } else {
-      let { rows } = response;
-      res.send(calculateAverageRating(rows));
+      // redis_set(`ratings${roomid}`, result, 'EX', 20); // refresh timer in redis
+      res.status(300).send(JSON.parse(result));
     }
+  })
+  .catch(error => {
+    res.status(500).send();
   })
 })
 
@@ -72,3 +100,10 @@ app.delete('/api/reviews/rooms/:roomid', (req, res) => {
 });
 
 app.listen(port, () => console.log(`Listening on ${port}`));
+
+
+// if (err) {
+//   return callback(err);
+// } else {
+//   return callback(null, JSON.parse(result));
+// }
