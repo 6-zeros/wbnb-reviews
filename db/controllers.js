@@ -1,12 +1,14 @@
 const { Pool } = require('pg');
+const { PG_PASSWORD } = require('./keys.js');
 
 const pool = new Pool({
   user: 'joshslee',
-  host: 'localhost',
+  host: '13.57.41.44',
   database: 'wbnb',
-  port: 5432
+  port: 5432,
+  password: PG_PASSWORD
 });
-
+a
 pool.connect(err => {
   if (err) throw err;
   console.log('Postgres connected')

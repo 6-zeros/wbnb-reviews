@@ -17,3 +17,5 @@ db/RedisMiddleware.js
 README.md
 Dockerfile
 spec/
+wbnb.sql
+db/keys.js

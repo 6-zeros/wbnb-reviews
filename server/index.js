@@ -25,13 +25,14 @@ app.get('/api/reviews/rooms/:roomid/', (req, res) => {
           let { rows } = response;
           sortReviews(rows, req)
           .then(reviews => {
-            // redis_set(roomid, JSON.stringify(reviews), 'EX', 20);
-            redis_set(roomid, JSON.stringify(reviews));
+            redis_set(roomid, JSON.stringify(reviews), 'EX', 20);
+            // redis_set(roomid, JSON.stringify(reviews));
             res.send(reviews);
           })
         }
       })
     } else {
+      redis_set(roomid, JSON.stringify(reviews), 'EX', 15);
       res.status(300).send(JSON.parse(result));
     }
   })
